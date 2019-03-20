@@ -1,7 +1,6 @@
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
 const mongoose = require('mongoose');
-const cors = require('cors');
 
 // mongoose open connections + even listener
 mongoose.connect('mongodb://localhost/portofolio', {useNewUrlParser: true});
@@ -13,9 +12,6 @@ mongoose.connection.once('open', () => {
 const schema = require('./schema/schema');
 
 const app = express();
-
-// ### PENGGUNAAN CORS UNTUK MEMPERBOLEHKAN CORS-ORIGIN REQUEST
-app.use(cors());
 
 // ###SET graphqlHTTP sebagai middleware ketika melakukan route ke /graphql
 // dan kita menjalanka schema yg di buat di dalamnya
