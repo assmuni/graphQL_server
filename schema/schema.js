@@ -10,6 +10,8 @@ const {
 
 const Book = require('../models/book');
 const Author = require('../models/author');
+const friendMongo = require('../models/friend');
+const hospitalMongo = require('../models/hospital');
 
 const BookType = new GraphQLObjectType({
     name: 'Book',
@@ -54,6 +56,42 @@ const AuthorType = new GraphQLObjectType({
     })
 });
 
+const FriendType = new GraphQLObjectType({
+    name: 'Friend',
+    fields: () => ({
+        id: { type: GraphQLID },
+        nama: { type: GraphQLString },
+        alamat: { type: GraphQLString },
+        umur: { type: GraphQLInt }
+    })
+});
+
+const hospitalAddress = new GraphQLObjectType({
+    name: 'HospitalAddress',
+    fields: () => ({
+        postal_code: { type: GraphQLInt },
+        address : { type: GraphQLString },
+        districts : { type: GraphQLString },
+        phone : { type: GraphQLString },
+        fax : { type: GraphQLString },
+        email : { type: GraphQLString }
+    })
+});
+
+const hospitalType = new GraphQLObjectType({
+    name: 'HospitalType',
+    description: 'ini tu buat nganu emm ngefetch data hospital gitu!',
+    fields: () => ({
+        code : { type: GraphQLInt },
+        name : { type: GraphQLString },
+        type : { type: GraphQLString },
+        class : { type: GraphQLString },
+        owner : { type: GraphQLString },
+        location: { type: hospitalAddress },
+        last_update : { type: GraphQLString }
+    })
+});
+
 const RootQuery = new GraphQLObjectType({
     name: 'RootQueryType',
     fields: {
@@ -66,6 +104,7 @@ const RootQuery = new GraphQLObjectType({
             },
             resolve(parent, args) {
                 // return _.find(books, { id: args.id });
+                // return console.log(args.id);
                 return Book.findById(args.id);
             }
         },
@@ -95,6 +134,34 @@ const RootQuery = new GraphQLObjectType({
                 // return authors;
                 return Author.find({});
             }
+        },
+        friends: {
+            type: new GraphQLList(FriendType),
+            resolve(parent, args) {
+                return friendMongo.find({});
+            }
+        },
+        friendFindByName: {
+            type: new GraphQLList(FriendType),
+            args: {
+                nama: {
+                    type: GraphQLString
+                }
+            },
+            resolve(parent, args) {
+                // return friendMongo.find({ nama: {'$regex': args.nama, '$options': 'i'} });
+                return friendMongo.find({ nama: {'$regex': args.nama, '$options': 'i'} }).then(
+                    (data) => {
+                        return data;
+                    }
+                )
+            }
+        },
+        hospitals: {
+            type: new GraphQLList(hospitalType),
+            resolve(parent, args)  {
+                return hospitalMongo.find();
+            }
         }
     }
 });
@@ -106,7 +173,7 @@ const Mutation = new GraphQLObjectType({
         addAuthor: {
             type: AuthorType,
             args: {
-                name: {
+                nama: {
                     // ### VALIDASI DENGAN GraphQLNotNull
                     type: new GraphQLNonNull(GraphQLString)
                 },
