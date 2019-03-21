@@ -18,10 +18,6 @@ const hospitalSchema = new Schema({
     owner: String,
     location: hospitalAddress,
     last_update: Date
-    // last_update: {
-    //     type: Date,
-    //     default: '0000-00-00'
-    // }
 });
 
 module.exports = mongoose.model('Hospital', hospitalSchema);

@@ -3,7 +3,8 @@ const graphqlHTTP = require('express-graphql');
 const mongoose = require('mongoose');
 
 // mongoose open connections + even listener
-mongoose.connect('mongodb://localhost/portofolio', {useNewUrlParser: true});
+// mongoose.connect('mongodb://localhost/portofolio', {useNewUrlParser: true});
+mongoose.connect('mongodb://userGraphql:userGraphql123@ds157509.mlab.com:57509/portofolio', {useNewUrlParser: true});
 mongoose.connection.once('open', () => {
     console.info('mongoDB connected');
 });

@@ -8,6 +8,8 @@ const {
     GraphQLNonNull
 } = require('graphql');
 
+const axios = require('axios');
+
 const Book = require('../models/book');
 const Author = require('../models/author');
 const friendMongo = require('../models/friend');
@@ -56,16 +58,6 @@ const AuthorType = new GraphQLObjectType({
     })
 });
 
-const FriendType = new GraphQLObjectType({
-    name: 'Friend',
-    fields: () => ({
-        id: { type: GraphQLID },
-        nama: { type: GraphQLString },
-        alamat: { type: GraphQLString },
-        umur: { type: GraphQLInt }
-    })
-});
-
 const hospitalAddress = new GraphQLObjectType({
     name: 'HospitalAddress',
     fields: () => ({
@@ -89,6 +81,17 @@ const hospitalType = new GraphQLObjectType({
         owner : { type: GraphQLString },
         location: { type: hospitalAddress },
         last_update : { type: GraphQLString }
+    })
+});
+
+const userJP = new GraphQLObjectType({
+    name: 'userJP',
+    description: 'get data exrternal API from jsonplaceholder.typicode.com',
+    fields: () => ({
+        id: { type: GraphQLID },
+        name: { type: GraphQLString },
+        username: { type: GraphQLString },
+        email: { type: GraphQLString }  
     })
 });
 
@@ -135,32 +138,37 @@ const RootQuery = new GraphQLObjectType({
                 return Author.find({});
             }
         },
-        friends: {
-            type: new GraphQLList(FriendType),
+        // ### JSON data dengan object bersarang
+        hospitals: {
+            type: new GraphQLList(hospitalType),
             resolve(parent, args) {
-                return friendMongo.find({});
+                return hospitalMongo.find();
             }
         },
-        friendFindByName: {
-            type: new GraphQLList(FriendType),
+        // ### searching data mongodb
+        hospitalFindByName: {
+            type: new GraphQLList(hospitalType),
             args: {
-                nama: {
+                name: {
                     type: GraphQLString
                 }
             },
             resolve(parent, args) {
-                // return friendMongo.find({ nama: {'$regex': args.nama, '$options': 'i'} });
-                return friendMongo.find({ nama: {'$regex': args.nama, '$options': 'i'} }).then(
+                // return hospitalMongo.find({ name: { '$regex': args.name, '$options': 'i' } });
+                return hospitalMongo.find({ name: {'$regex': args.name, '$options': 'i'} }).then(
                     (data) => {
                         return data;
                     }
                 )
             }
         },
-        hospitals: {
-            type: new GraphQLList(hospitalType),
-            resolve(parent, args)  {
-                return hospitalMongo.find();
+        // ### get data from external API
+        usersJP: {
+            type: new GraphQLList(userJP),
+            resolve(parent, args) {
+                return axios.get('https://jsonplaceholder.typicode.com/users').then((result) => {
+                    return result.data;
+                });
             }
         }
     }
@@ -173,7 +181,7 @@ const Mutation = new GraphQLObjectType({
         addAuthor: {
             type: AuthorType,
             args: {
-                nama: {
+                name: {
                     // ### VALIDASI DENGAN GraphQLNotNull
                     type: new GraphQLNonNull(GraphQLString)
                 },
